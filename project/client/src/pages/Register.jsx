@@ -1,13 +1,24 @@
 import React from "react";
-import {Form, Input, Button } from 'antd';
+import {Form, Input, Button , message } from 'antd';
 import {Link} from "react-router-dom"
 import { register } from "../calls/authCalls.js";
 
 function Register() {
 
   const onSubmit = async (values)=>{
-    const userData= await register(values)
-    console.log(userData)
+    try {
+     const userData= await register(values)
+     if(userData.success){
+        message.success(userData.message)
+     }else{
+        message.error(userData.message)
+     }
+    } catch (error) {
+        console.log(error.message)
+    }
+ 
+
+  
   }
 
   return (
