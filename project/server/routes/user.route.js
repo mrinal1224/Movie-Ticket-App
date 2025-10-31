@@ -20,6 +20,7 @@ userRouter.post("/register", async (req, res) => {
 
     // hash the password
     const salt = await bcrypt.genSalt(10)
+    console.log(salt)
     const hashPwd = bcrypt.hashSync(req.body.password , salt)
     req.body.password = hashPwd
 
@@ -40,5 +41,39 @@ userRouter.post("/register", async (req, res) => {
 
 
 // Login Api
+
+userRouter.post('/login' , async(req , res)=>{
+    try {
+        const user = await User.findOne({ email: req.body.email })
+
+        if(!user){
+            res.send({
+                success: false,
+                message: "user does not exist Please Register",
+              });
+        }
+
+        const validPassword = await bcrypt.compare(req.body.password , user.password)
+
+        if(!validPassword){
+            res.send({
+                success: false,
+                message: "Sorry, invalid password entered!"
+            })
+        }
+
+        res.send({
+            success: true,
+            message: "You've successfully logged in!",
+        
+        })
+
+
+    } catch (error) {
+         res.status(500).json({message :'Error in Logging in!'})
+    }
+})
+
+
 
 module.exports = userRouter
