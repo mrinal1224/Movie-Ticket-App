@@ -1,6 +1,7 @@
 // Import the Express framework, which is used to create a web server and handle HTTP requests
 const express = require('express')
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 
 // Import the database configuration file that contains connection logic for the database
 const dbConfig = require('./dbConfig.js')
@@ -26,6 +27,8 @@ app.use(express.json())
 app.use(cors({
     origin:"http://localhost:5173"
 }))
+
+app.use(cookieParser())
 
 // Mount all routes defined in userRoutes under the '/api/auth' path
 // Example: a route defined as '/login' in user.route.js will become '/api/auth/login'

@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/user.model.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const isAuth = require('../middlewares/authMiddleware.js')
 
 const userRouter = express.Router(); // Route
 
@@ -64,14 +65,29 @@ userRouter.post("/login", async (req, res) => {
 
    const token =  jwt.sign({ userId: user._id }, process.env.JWT_SECRET , {expiresIn:'10d'});
 
+    res.cookie('jwtToken' , token , {
+          httpOnly : true,
+    })
+
+
     res.send({
       success: true,
       message: "You've successfully logged in!",
-      token : token
     });
   } catch (error) {
     res.status(500).json({ message: "Error in Logging in!" });
   }
 });
+
+
+userRouter.get("/current-user",isAuth,  async (req, res) => {
+   const userId =  req.userId
+   res.send({userId : userId})
+});
+
+
+
+
+
 
 module.exports = userRouter;
