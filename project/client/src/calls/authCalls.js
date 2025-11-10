@@ -30,7 +30,9 @@ export const getCurrentUser = async()=>{
        const response = await api.get('/api/auth/current-user' ,{withCredentials:true} )
        return response.data
     } catch (error) {
-        console.log(error)
+        console.log('Error getting current user:', error.response?.data || error.message)
+        // Return null instead of undefined when there's an error
+        return null
     }
 }
 
