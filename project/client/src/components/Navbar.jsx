@@ -20,7 +20,7 @@ function Home() {
     (async () => {
       const user = await getCurrentUser();
       const movies = await getAllMovies();
-       setMovies(movies.data)
+       
       dispatch(setUserData(user || null));
     })();
   }, []);
