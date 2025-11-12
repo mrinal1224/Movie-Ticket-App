@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import {BrowserRouter , Routes , Route} from "react-router-dom"
 import ProtectedRoute from './components/ProtectedRoute'
 import PublicRoute from './components/PublicRoute'
+import Admin from './pages/Admin'
 
 function App() {
  
@@ -16,6 +17,7 @@ function App() {
          <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
          <Route path='/login' element={<PublicRoute><Login/></PublicRoute>}/>
          <Route path='/register' element={<PublicRoute><Register/></PublicRoute>}/>
+         <Route path='/admin' element={<Admin/>}></Route>
        </Routes>
     </BrowserRouter>
      
