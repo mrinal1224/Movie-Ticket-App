@@ -25,4 +25,13 @@ export const addMovie = async(values)=>{
     }
 }
 
+export const updateMovie = async(payload)=>{
+    try {
+       const response = await api.put('/api/movie/update-movie' , payload)
+       return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 

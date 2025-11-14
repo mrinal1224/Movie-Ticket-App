@@ -19,8 +19,7 @@ const Movie = require('../models/movie.model.js')
 
  const updateMovie = async(req , res)=>{
     try {
-     const movieId = req.params.id
-     const movie = await Movie.findByIdAndUpdate(movieId , req.body)
+     const movie = await Movie.findByIdAndUpdate(req.body.movieId , req.body)
        res.send({
             success: true,
             message: 'The movie has been updated!',

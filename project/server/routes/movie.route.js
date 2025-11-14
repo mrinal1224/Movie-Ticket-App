@@ -14,7 +14,7 @@ movieRouter.post('/add-movie' ,addMovie )
 
 // update movie
 
-movieRouter.put('/update-movie/:id' ,updateMovie )
+movieRouter.put('/update-movie/' ,updateMovie )
 
 
 
