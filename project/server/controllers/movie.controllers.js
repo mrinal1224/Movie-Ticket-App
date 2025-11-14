@@ -10,6 +10,7 @@ const Movie = require('../models/movie.model.js')
         })
    } catch (error) {
          res.send({
+            error : error,
             success: false,
             message: 'Movie Could not be added'
         })

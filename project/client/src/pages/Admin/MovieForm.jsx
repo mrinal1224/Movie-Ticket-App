@@ -1,9 +1,22 @@
 import React from 'react'
-import { Modal , Form , Row, Col , Input, Select , Button} from 'antd'
+import { Modal , Form , Row, Col , Input, Select , Button, message} from 'antd'
 import TextArea from 'antd/es/input/TextArea';
+import { addMovie } from '../../calls/movieCalls.js';
 
 function MovieForm({isModalOpen , setIsModalOpen}) {
-
+  const onFinish = async(values)=>{
+       try {
+         const respone = await addMovie(values)
+         console.log(respone)
+         if(respone.success){
+          message.success(respone.message)
+         }else{
+          message.error(respone.message)
+         }
+       } catch (error) {
+          console.log(error)
+       }
+  }
 
   const handleCancel =()=>{
     setIsModalOpen(false)
@@ -11,7 +24,7 @@ function MovieForm({isModalOpen , setIsModalOpen}) {
 
   return (
     <Modal open={isModalOpen} width={800} onCancel={handleCancel}  >
-      <Form layout='vertical' style={{width: "100%"}} >
+      <Form layout='vertical' style={{width: "100%"}} onFinish={onFinish} >
           <Row gutter={{
             xs: 6,
             sm: 10,
@@ -81,8 +94,8 @@ function MovieForm({isModalOpen , setIsModalOpen}) {
                     </Form.Item>
                   </Col>
                   <Col span={16}>
-                    <Form.Item  label="Poster  URL" htmlFor='poster' name="poster" className='d-block' rules={[{required: true, message: "Movie Poster  is required!"}]}>
-                    <Input id="poster" type="text" placeholder='Enter the poster URL'></Input>
+                    <Form.Item  label="posterPath" htmlFor='posterPath' name="posterPath" className='d-block' rules={[{required: true, message: "Movie Poster  is required!"}]}>
+                    <Input id="posterPath" type="text" placeholder='Enter the poster URL'></Input>
                   </Form.Item>
                   </Col>
               </Row>              
