@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { getAllMovies } from "../../calls/movieCalls";
 import {Table , Button} from "antd"
 import moment from 'moment'
+import MovieForm from "./MovieForm";
 
 function MovieList() {
   const [movies, setMovies] = useState([]);
+  const [isModalOpen , setIsModalOpen]= useState(false)
 
   // getting all the Movies
 
@@ -84,11 +86,14 @@ function MovieList() {
   return (
     <div >
         <div className="d-flex justify-content-end">
-         <Button>Add Movie</Button>
+         <Button onClick={()=>{
+            setIsModalOpen(true)
+         }}>Add Movie</Button>
         </div>
 
          
         <Table dataSource={movies} columns={tableHeadings}/>
+        {isModalOpen && <MovieForm  isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}/>}
     </div>
   );
 }
