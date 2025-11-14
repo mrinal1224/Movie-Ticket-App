@@ -88,7 +88,10 @@ function MovieForm({isModalOpen , setIsModalOpen}) {
               </Row>              
             </Col>            
           </Row>          
-         
+          <Form.Item>
+              <Button block type="primary" htmlType='submit' style={{fontSize: "1rem", fontWeight: "600"}}>Submit the Data</Button>
+              <Button className='mt-3' block >Cancel</Button>
+          </Form.Item>
       </Form> 
     </Modal>
   )
