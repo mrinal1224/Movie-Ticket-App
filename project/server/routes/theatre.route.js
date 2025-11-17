@@ -1,3 +1,4 @@
+const express = require('express')
 const Theatre = require('../models/theatre.model.js');
 
 const theatreRouter = express.Router(); // Route
