@@ -21,17 +21,35 @@ export const addTheatre = async(values)=>{
 
 export const updateTheatre = async (payload) => {
     try{
-        const response = await axiosInstance.put('/api/theatres/update-theatre', payload);
+        const response = await api.put('/api/theatre/update-theatre', payload);
         return response.data;
     }catch(err){
-        return err.resposne;
+        console.log(err);
+        return {
+            success: false,
+            message: err.response?.data?.message || err.message || 'Failed to update theatre'
+        };
     }
 }
 
 // Get theatres of a specific owner
 export const getAllTheatres = async (payload) => {
     try{
-        const response = await axiosInstance.post('/api/theatres/get-all-theatres-by-owner', payload);
+        const response = await api.post('/api/theatre/get-all-theatres-by-owner', payload);
+        return response.data;
+    }catch(err){
+        console.log(err);
+        return {
+            success: false,
+            message: err.response?.data?.message || err.message || 'Failed to get theatres',
+            data: []
+        };
+    }
+}
+
+export const getAllTheatresForAdmin = async () => {
+    try{
+        const response = await api.get('/api/theatre/get-all-theatres');
         return response.data;
     }catch(err){
         return err.response;

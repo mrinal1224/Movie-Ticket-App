@@ -45,13 +45,16 @@ theatreRouter.get('/get-all-theatres', async (req, res) => {
 // Get the theatres of a specific owner
 theatreRouter.post('/get-all-theatres-by-owner',  async (req, res) => {
     try{
+        console.log("Getting theatres for owner:", req.body.owner);
         const allTheatres = await Theatre.find({owner: req.body.owner});
+        console.log("Found theatres:", allTheatres.length);
         res.send({
             success: true,
             message: "All theatres fetched successfully!",
             data: allTheatres
         })
     }catch(err){
+        console.error("Error fetching theatres by owner:", err);
         res.send({
             success: false,
             message: err.message

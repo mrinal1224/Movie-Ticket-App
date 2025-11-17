@@ -21,24 +21,30 @@ const TheatreListPartner = () => {
   const dispatch = useDispatch();
 
 
-  const getData = async (userDataId) => {
+  const getData = async (userId = null) => {
     try {
+      const ownerId = userId || userData?._id;
+      if (!ownerId) {
+        message.error("User data not available");
+        return;
+      }
 
-      const response = await getAllTheatres({ owner:userDataId  });
-      console.log(response)
-      if (response.success) {
-        const allTheatres = response.data;
-         console.log(allTheatres);
+      const response = await getAllTheatres({ owner: ownerId });
+      console.log("Get theatres response:", response);
+      if (response && response.success) {
+        const allTheatres = response.data || [];
+        console.log("All theatres:", allTheatres);
         setTheatres(
           allTheatres.map(function (item) {
             return { ...item, key: `theatre${item._id}` };
           })
         );
       } else {
-        message.error(response.message);
+        message.error(response?.message || "Failed to fetch theatres");
       }
     } catch (err) {
-      message.error(err.message);
+      console.error("Error in getData:", err);
+      message.error(err.message || "Failed to fetch theatres");
     }
   };
 
@@ -46,8 +52,10 @@ const TheatreListPartner = () => {
    useEffect(() => {
       (async () => {
         const user = await getCurrentUser();
-         dispatch(setUserData(user || null));
-         getData(user._id);
+        dispatch(setUserData(user || null));
+        if (user && user._id) {
+          getData(user._id);
+        }
       })();
     }, []);
 
@@ -126,16 +134,23 @@ const TheatreListPartner = () => {
   return (
     <>
       <div className="d-flex justify-content-end">
-        <Button type="primary" onClick={() => setIsModalOpen(true)}>
+        <Button type="primary" onClick={() => {
+          setFormType("add");
+          setSelectedTheatre(null);
+          setIsModalOpen(true);
+        }}>
           Add Theatre
         </Button>
       </div>
-      <Table dataSource={theatres} columns={columns} />
+      <Table dataSource={theatres || []} columns={columns} />
       {isModalOpen && (
         <TheatreForm
           isModalOpen={isModalOpen}
           formType={formType}
           setIsModalOpen={setIsModalOpen}
+          selectedTheatre={selectedTheatre}
+          setSelectedTheatre={setSelectedTheatre}
+          getData={getData}
         />
       )}
     </>
