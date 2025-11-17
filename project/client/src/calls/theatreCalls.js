@@ -12,7 +12,34 @@ export const addTheatre = async(values)=>{
        return response.data
     } catch (error) {
         console.log(error)
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || 'Failed to add theatre'
+        }
     }
 }
+
+export const updateTheatre = async (payload) => {
+    try{
+        const response = await axiosInstance.put('/api/theatres/update-theatre', payload);
+        return response.data;
+    }catch(err){
+        return err.resposne;
+    }
+}
+
+// Get theatres of a specific owner
+export const getAllTheatres = async (payload) => {
+    try{
+        const response = await axiosInstance.post('/api/theatres/get-all-theatres-by-owner', payload);
+        return response.data;
+    }catch(err){
+        return err.response;
+    }
+}
+
+
+
+
 
 

@@ -7,13 +7,17 @@ const theatreRouter = express.Router(); // Route
 
 theatreRouter.post('/add-theatre',  async (req, res) => {
     try{
+        console.log("Received theatre data:", req.body);
         const newTheatre = new Theatre(req.body);
-        await newTheatre.save();
+        const savedTheatre = await newTheatre.save();
+        console.log("Saved theatre:", savedTheatre);
         res.send({
             success: true,
-            message: "New theatre has been added!"
+            message: "New theatre has been added!",
+            data: savedTheatre
         })
     }catch(err){
+        console.error("Error adding theatre:", err);
         res.send({
             success: false,
             message: err.message

@@ -3,36 +3,45 @@ import { useDispatch } from 'react-redux';
 // import { addTheatre, updateTheatre } from '../../calls/theatres';
 import TextArea from 'antd/es/input/TextArea';
 import { useSelector } from 'react-redux';
+import { addTheatre } from '../../calls/theatreCalls';
 
 const TheatreForm = ({isModalOpen, setIsModalOpen, selectedTheatre, setSelectedTheatre, formType, getData}) => {
     const dispatch = useDispatch();
-    const { user } = useSelector((state) => state.user)
+    const { userData } = useSelector((state) => state.user)
 
   // const handleChange = (value) => {
   //   console.log(`selected ${value}`);
   // }
 
-  const onFinish = async (values)  => {
+   const onFinish = async (values)  => {
     try{
-   
+      if(!userData || !userData._id){
+        message.error("User data not available. Please login again.");
+        return;
+      }
+
       let response = null;
       if(formType === "add"){
-        response = await addTheatre({...values, owner: user._id});
+        const theatreData = {
+          ...values,
+          owner: userData._id
+        };
+        console.log("Sending theatre data:", theatreData);
+        response = await addTheatre(theatreData);
       }else{
-        values.theatreId = selectedTheatre._id;
-        response = await updateTheatre(values);
+        // values.theatreId = selectedTheatre._id;
+        // response = await updateTheatre(values);
       }
-      console.log(response);
-      if(response.success){
-        getData();
+      console.log("Response:", response);
+      if(response && response.success){
+        if(getData) getData();
         message.success(response.message);
         setIsModalOpen(false);
       }else{
-        message.error(response.message)
-      }
-     
+        message.error(response?.message || "Failed to add theatre")
+      }   
     }catch(err){
-    
+      console.error("Error in onFinish:", err);
       message.error(err.message);
     }
   }
