@@ -39,21 +39,21 @@ theatreRouter.get('/get-all-theatres', async (req, res) => {
 });
 
 // Get the theatres of a specific owner
-// theatreRouter.post('/get-all-theatres-by-owner',  async (req, res) => {
-//     try{
-//         const allTheatres = await Theatre.find({owner: req.body.owner});
-//         res.send({
-//             success: true,
-//             message: "All theatres fetched successfully!",
-//             data: allTheatres
-//         })
-//     }catch(err){
-//         res.send({
-//             success: false,
-//             message: err.message
-//         })
-//     }
-// });
+theatreRouter.post('/get-all-theatres-by-owner',  async (req, res) => {
+    try{
+        const allTheatres = await Theatre.find({owner: req.body.owner});
+        res.send({
+            success: true,
+            message: "All theatres fetched successfully!",
+            data: allTheatres
+        })
+    }catch(err){
+        res.send({
+            success: false,
+            message: err.message
+        })
+    }
+});
 
 
 // Update theatre

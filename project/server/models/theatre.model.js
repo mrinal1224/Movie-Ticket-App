@@ -25,9 +25,10 @@ const theatreSchema = new mongoose.Schema(
         default:false
     },
 
-    // owner:{
-    //     type
-    // },
+    owner:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User"
+    },
 
 
   },
