@@ -21,6 +21,7 @@ dbConfig.connectDb()
 // Import user-related routes from the user.route.js file
 const userRoutes = require('./routes/user.route.js')
 const movieRoutes = require('./routes/movie.route.js')
+const theatreRoutes = require('./routes/theatre.route.js')
 
 // Enable the app to automatically parse incoming JSON request bodies
 app.use(express.json())
@@ -36,6 +37,7 @@ app.use(cookieParser())
 // Example: a route defined as '/login' in user.route.js will become '/api/auth/login'
 app.use('/api/auth', userRoutes)
 app.use('/api/movie', movieRoutes)
+app.use('/api/theatre',theatreRoutes)
 
 // Start the server on port 8001 and run the callback function once the server starts successfully
 app.listen(8001, () => {
