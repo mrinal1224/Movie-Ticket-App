@@ -60,6 +60,7 @@ showRouter.get("/get-all-theatres-by-movie", async (req, res) => {
             const shows = await Show.find({movie ,date})
 
             // we need to map the shows with theatres
+            
               
             res.send({
                 success : true,
@@ -98,6 +99,25 @@ showRouter.get('/get-show-by-id' , async(req , res)=>{
             message: error.message
         })
     }
+})
+
+
+showRouter.get('/get-all-shows' ,async(req , res)=>{
+    try {
+        const allShows = await Show.find({}).populate('movie')
+        res.send({
+            success : true,
+            message : "All Shows Fetched",
+            data : allShows
+        })
+    } catch (error) {
+        res.send({
+            success : false,
+            message : `Not able to fetch Shows ${error}`,
+           
+        })
+    }
+   
 })
 
 

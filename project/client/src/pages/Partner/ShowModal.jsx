@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal, Table, Form, Row, Col, Input, Select } from "antd";
+import { Button, Modal, Table, Form, Row, Col, Input, Select , message } from "antd";
 import {
   ArrowLeftOutlined,
   EditOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
 import { getAllMovies } from "../../calls/movieCalls";
+import { addShow, getShows } from "../../calls/showCalls";
 
 
 
 const ShowModal = ({ isShowModalOpen, setIsShowModalOpen }) => {
   const [view, setView] = useState("table");
   const [movies , setMovies] = useState([])
+  const [shows , setShows] = useState([])
 
   function handleCancel() {
     setIsShowModalOpen(false);
@@ -27,10 +29,33 @@ const ShowModal = ({ isShowModalOpen, setIsShowModalOpen }) => {
         else{
             message.error(movieResponse.error);
         }
+
+       const allShowsResponse =  await getShows()
+        setShows(allShowsResponse.data)
+       if(allShowsResponse.success){
+         console.log(allShowsResponse)
+       }
+       else{
+        console.log(all)
+       }
         
     } catch (error) {
         message.error(error.message);
     }
+  }
+
+
+  const onFinish = async(values)=>{
+      try {
+         const response = await addShow(values)
+         console.log(response)
+         if(response.sucess){
+            message.success(response.message);
+            setView('table')
+         }
+      } catch (error) {
+        message.error('Cannot add Show')
+      }
   }
 
 
@@ -41,15 +66,24 @@ const ShowModal = ({ isShowModalOpen, setIsShowModalOpen }) => {
   const columns = [
     {
       title: "ShowName",
+      dataIndex: 'name'
+
+
     },
     {
       title: "Show Date",
+      dataIndex: "date",
     },
     {
       title: "Show Time",
+      dataIndex: "time",
     },
     {
       title: "Movie",
+      dataIndex: "movie",
+      render : (text , data)=>{
+        return data.movie.title
+      }
     },
 
     {
@@ -58,13 +92,16 @@ const ShowModal = ({ isShowModalOpen, setIsShowModalOpen }) => {
 
     {
       title: "Total Seats",
+      dataIndex : 'totalSeats'
     },
     {
       title: "Ticket Price",
+      dataIndex:'ticketPrice'
     },
-    {
-      title: "Availbale Seats",
-    },
+    // {
+    //   title: "Availbale Seats",
+    //   dataIndex:'seats'
+    // },
   ];
 
   return (
@@ -85,10 +122,10 @@ const ShowModal = ({ isShowModalOpen, setIsShowModalOpen }) => {
           )}
         </div>
 
-        {view === "table" && <Table columns={columns} />}
+        {view === "table" && <Table dataSource={shows} columns={columns} />}
 
         {view === "form" && (
-          <Form>
+          <Form onFinish={onFinish}>
             <Row
               gutter={{
                 xs: 6,
