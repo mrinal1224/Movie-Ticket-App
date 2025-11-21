@@ -35,3 +35,13 @@ export const updateMovie = async(payload)=>{
 }
 
 
+export const getSingleMovie = async(id)=>{
+    try {
+       const response = await api.get(`/api/movie/${id}`)
+       return response.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
