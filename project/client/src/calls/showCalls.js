@@ -17,9 +17,9 @@ export const addShow = async (payload) => {
     }
 }
 
-export const getShows = async () => {
+export const getShows = async (payload) => {
     try{
-        const response = await api.get('/api/shows/get-all-shows');
+        const response = await api.post('/api/shows/get-all-shows' , payload);
         return response.data;
     }catch(err){
         return err.message;
