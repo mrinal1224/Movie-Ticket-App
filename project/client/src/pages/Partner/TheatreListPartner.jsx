@@ -22,6 +22,8 @@ const TheatreListPartner = () => {
   const dispatch = useDispatch();
 
 
+
+
   const getData = async (userId = null) => {
     try {
       const ownerId = userId || userData?._id;
@@ -119,7 +121,7 @@ const TheatreListPartner = () => {
               <Button
                 onClick={() => {
                   setIsShowModalOpen(true);
-                  // setSelectedTheatre(data);
+                  setSelectedTheatre(data);
                 }}
               >
                 + Shows
@@ -156,7 +158,7 @@ const TheatreListPartner = () => {
       )}
 
      {
-      isShowModalOpen && <ShowModal isShowModalOpen={isShowModalOpen} setIsShowModalOpen={setIsShowModalOpen} />
+      isShowModalOpen && <ShowModal isShowModalOpen={isShowModalOpen} setIsShowModalOpen={setIsShowModalOpen} selectedTheatre={selectedTheatre} setSelectedTheatre={setSelectedTheatre} />
      }
 
     </>
