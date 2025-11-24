@@ -1,14 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getSingleMovie } from "../calls/movieCalls";
 import moment from "moment";
-import { Card, Row, Col, Image, Typography, Rate, Tag, Button } from "antd";
+import {
+  Card,
+  Row,
+  Col,
+  Image,
+  Typography,
+  Rate,
+  Tag,
+  Button,
+  Input,
+} from "antd";
 
 const { Title } = Typography;
 
 export default function SingleMovie() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [date, setDate] = useState(moment().format("YYYY-MM-DD"));
+  const navigate = useNavigate();
+
+  const handleDate = (e) => {
+    setDate(moment(e.target.value).format("YYYY-MM-DD"));
+    navigate(`/singleMovie/${id}?date=${e.target.value}`);
+  };
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -25,7 +42,7 @@ export default function SingleMovie() {
 
   return (
     <div style={{ padding: 16 }}>
-      {movie ? (
+      {movie && (
         <Card>
           <Row gutter={16}>
             <Col xs={24} sm={8}>
@@ -90,12 +107,15 @@ export default function SingleMovie() {
                 <div style={{ marginTop: 16 }}>
                   <Button type="primary">Book Tickets</Button>
                 </div>
+                {/* Date Picker */}
+                <div className="d-flex">
+                  <label>Choose Date</label>
+                  <Input onChange={handleDate} type="date" value={date} />
+                </div>
               </div>
             </Col>
           </Row>
         </Card>
-      ) : (
-        <div>Loading...</div>
       )}
     </div>
   );

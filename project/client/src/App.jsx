@@ -21,7 +21,7 @@ function App() {
          <Route path='/register' element={<PublicRoute><Register/></PublicRoute>}/>
          <Route path='/admin' element={<Admin/>}></Route>
          <Route path='/partner' element={<Partner/>}></Route>
-         <Route path='/singleMovie/:id' element={<SingleMovie/>}></Route>
+         <Route path='/singleMovie/:id/' element={<SingleMovie/>}></Route>
        </Routes>
     </BrowserRouter>
      

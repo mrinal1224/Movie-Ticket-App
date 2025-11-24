@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Table, Form, Row, Col, Input, Select , message } from "antd";
+import moment from "moment";
 import {
   ArrowLeftOutlined,
   EditOutlined,
@@ -77,6 +78,10 @@ const ShowModal = ({ isShowModalOpen, setIsShowModalOpen , selectedTheatre }) =>
     {
       title: "Show Date",
       dataIndex: "date",
+      render: (text, data) => {
+        return moment(data.date).format("DD-MM-YYYY");
+      },
+
     },
     {
       title: "Show Time",
