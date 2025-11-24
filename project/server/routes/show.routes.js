@@ -54,73 +54,81 @@ showRouter.put("/update-show", async (req, res) => {
 
 // get all shows and theatres for a movie
 
-showRouter.get("/get-all-theatres-by-movie", async (req, res) => {
-     try {
-            const {movie , date} = req.body
-            const shows = await Show.find({movie ,date})
+showRouter.post("/get-all-theatres-by-movie", async (req, res) => {
+  try {
+    const { movie, date } = req.body;
+    const shows = await Show.find({ movie, date }).populate('theatre');
 
-            // we need to map the shows with theatres
-            
-              
-            res.send({
-                success : true,
-                message : 'Shows Fetched',
-                shows : shows
-            })
-     } catch (error) {
-        res.send({
-            success : false,
-            message : 'Shows not Fetched'
-        })
-     }
+    // we need to map the shows with unique theatres
 
+    // Filter out shows by uniue theatres
 
+    let uniqueTheatres = [];
 
+    shows.forEach((show) => {
+      let isTheatre = uniqueTheatres.find(
+        (theatre) => theatre._id === show.theatre._id
+      );
 
+      if (!isTheatre) {
+        let showsOfThisTheatre = shows.filter(
+          (showObj) => showObj.theatre._id == show.theatre._id
+        );
 
+        uniqueTheatres.push({
+          ...show.theatre._doc,
+          shows: showsOfThisTheatre,
+        });
+      }
+    });
 
+    res.send({
+      success: true,
+      message: "Shows Fetched",
+      shows: uniqueTheatres,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: "Shows not Fetched",
+    });
+  }
 });
-
 
 // get-show-by-id
 
-showRouter.get('/get-show-by-id' , async(req , res)=>{
-    try {
-        const show = Show.findById(req.body.showId)
-        res.send({
-            success: true,
-            message: 'Show fetched!',
-            data: show
-        });
+showRouter.get("/get-show-by-id", async (req, res) => {
+  try {
+    const show = Show.findById(req.body.showId);
+    res.send({
+      success: true,
+      message: "Show fetched!",
+      data: show,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 
-    } catch (error) {
-        res.send({
-            success: false,
-            message: error.message
-        })
-    }
-})
-
-
-showRouter.post('/get-all-shows' ,async(req , res)=>{
-    try {
-        const allShows = await Show.find({theatre:req.body.thearteId }).populate('movie').populate('theatre')
-        res.send({
-            success : true,
-            message : "All Shows Fetched",
-            data : allShows
-        })
-    } catch (error) {
-        res.send({
-            success : false,
-            message : `Not able to fetch Shows ${error}`,
-           
-        })
-    }
-   
-})
-
-
-
+showRouter.post("/get-all-shows", async (req, res) => {
+  try {
+    const allShows = await Show.find({ theatre: req.body.thearteId })
+      .populate("movie")
+      .populate("theatre");
+    res.send({
+      success: true,
+      message: "All Shows Fetched",
+      data: allShows,
+    });
+  } catch (error) {
+    res.send({
+      success: false,
+      message: `Not able to fetch Shows ${error}`,
+    });
+  }
+});
 
 module.exports = showRouter;
