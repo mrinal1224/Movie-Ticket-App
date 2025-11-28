@@ -1,27 +1,26 @@
 const express = require('express')
 const Movie = require('../models/movie.model.js');
 const { addMovie, updateMovie } = require('../controllers/movie.controllers.js');
+const isAuth = require('../middlewares/authMiddleware.js');
+const { requireAdmin } = require('../middlewares/roleMiddleware.js');
 
 
 const movieRouter = express.Router(); // Route
 
 
-// Add a Movie
-
-movieRouter.post('/add-movie' ,addMovie )
-
+// Add a Movie (Admin only)
+movieRouter.post('/add-movie', isAuth, requireAdmin, addMovie)
 
 
-// update movie
 
-movieRouter.put('/update-movie/' ,updateMovie )
+// update movie (Admin only)
+movieRouter.put('/update-movie/', isAuth, requireAdmin, updateMovie)
 
 
 
 
-// Delete Movie
-
-movieRouter.delete('/delete-movie/:id' , async(req , res)=>{
+// Delete Movie (Admin only)
+movieRouter.delete('/delete-movie/:id', isAuth, requireAdmin, async(req , res)=>{
     try {
      const movieId = req.params.id
      const movie = await Movie.findByIdAndDelete(movieId , req.body)

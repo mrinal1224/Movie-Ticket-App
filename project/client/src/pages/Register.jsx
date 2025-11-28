@@ -1,97 +1,127 @@
 import React from "react";
-import {Form, Input, Button , message } from 'antd';
-import {Link} from "react-router-dom"
+import { Form, Input, Button, message, Card, Typography, Radio } from 'antd';
+import { Link, useNavigate } from "react-router-dom"
 import { register } from "../calls/authCalls.js";
+import { VideoCameraOutlined } from '@ant-design/icons';
+import './Auth.css';
+
+const { Title, Text } = Typography;
 
 function Register() {
+  const navigate = useNavigate();
 
-  const onSubmit = async (values)=>{
+  const onSubmit = async (values) => {
     try {
-     const userData= await register(values)
-     if(userData.success){
+      const userData = await register(values)
+      if (userData.success) {
         message.success(userData.message)
-     }else{
+        // Navigate based on role
+        if (values.role === 'partner') {
+          navigate('/partner')
+        } else {
+          navigate('/home')
+        }
+      } else {
         message.error(userData.message)
-     }
+      }
     } catch (error) {
-        console.log(error.message)
+      console.log(error.message)
+      message.error("Registration failed")
     }
- 
-
-  
   }
 
   return (
-    <>
-      <header className="App-header">
-        <main className="main-area mw-500 text-center px-3">
-          <section className="left-section">
-            <h1>Register to BookMyShow</h1>
-          </section>
-          <section className="right-section">
-            <Form layout="vertical" onFinish={onSubmit}>
+    <div className="auth-page">
+      <div className="auth-container">
+        <div className="auth-left">
+          <div className="auth-brand">
+            <VideoCameraOutlined className="brand-icon" />
+            <Title level={1} className="brand-title">MovieHub</Title>
+            <Text className="brand-subtitle">Join us and start booking your favorite movies</Text>
+          </div>
+        </div>
+
+        <div className="auth-right">
+          <Card className="auth-card">
+            <Title level={2} className="auth-title">Create Account</Title>
+            <Text className="auth-subtitle">Sign up to get started</Text>
+
+            <Form layout="vertical" onFinish={onSubmit} className="auth-form">
               <Form.Item
-                label="Name"
-                htmlFor="name"
+                label="Full Name"
                 name="name"
-                className="d-block"
                 rules={[{ required: true, message: "Name is required!" }]}
               >
                 <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your name"
-                  rules={[{ required: true, message: "Email is required!" }]}
-                ></Input>
+                  size="large"
+                  placeholder="Enter your full name"
+                  className="auth-input"
+                />
               </Form.Item>
+
               <Form.Item
                 label="Email"
-                htmlFor="email"
                 name="email"
-                className="d-block"
-                rules={[{ required: true, message: "Email is required!" }]}
+                rules={[
+                  { required: true, message: "Email is required!" },
+                  { type: 'email', message: "Please enter a valid email" }
+                ]}
               >
                 <Input
-                  id="email"
+                  size="large"
                   type="email"
                   placeholder="Enter your email"
-                ></Input>
+                  className="auth-input"
+                />
               </Form.Item>
+
               <Form.Item
                 label="Password"
-                htmlFor="password"
                 name="password"
-                className="d-block"
-                rules={[{ required: true, message: "Password is required!" }]}
+                rules={[
+                  { required: true, message: "Password is required!" },
+                  { min: 6, message: "Password must be at least 6 characters" }
+                ]}
               >
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter the password"
-                ></Input>
+                <Input.Password
+                  size="large"
+                  placeholder="Create a password"
+                  className="auth-input"
+                />
               </Form.Item>
-    
+
+              <Form.Item
+                label="Register As"
+                name="role"
+                initialValue="user"
+                rules={[{ required: true, message: "Please select a role!" }]}
+              >
+                <Radio.Group size="large" className="role-selector">
+                  <Radio.Button value="user">User</Radio.Button>
+                  <Radio.Button value="partner">Partner</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
 
               <Form.Item>
                 <Button
                   block
                   type="primary"
                   htmlType="submit"
-                  style={{ fontSize: "1rem", fontWeight: "600" }}
+                  size="large"
+                  className="auth-button"
                 >
-                  Sign Up
+                  Create Account
                 </Button>
               </Form.Item>
             </Form>
-            <div>
-              <p>
-                Already a user? <Link to="/login">Login now</Link>
-              </p>
+
+            <div className="auth-footer">
+              <Text>Already have an account? <Link to="/login" className="auth-link">Sign in</Link></Text>
             </div>
-          </section>
-        </main>
-      </header>
-    </>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -28,11 +28,30 @@ export const login = async(values)=>{
 export const getCurrentUser = async()=>{
     try {
        const response = await api.get('/api/auth/current-user' ,{withCredentials:true} )
-       return response.data
+       // Ensure consistent user data structure
+       if (response.data && typeof response.data === 'object') {
+         return {
+           _id: response.data._id,
+           name: response.data.name,
+           email: response.data.email,
+           role: response.data.role,
+         };
+       }
+       return response.data;
     } catch (error) {
         console.log('Error getting current user:', error.response?.data || error.message)
         // Return null instead of undefined when there's an error
         return null
+    }
+}
+
+export const logout = async()=>{
+    try {
+       const response = await api.post('/api/auth/logout' ,{withCredentials:true} )
+       return response.data
+    } catch (error) {
+        console.log('Error logging out:', error.response?.data || error.message)
+        return { success: false, message: 'Logout failed' }
     }
 }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getSingleMovie } from "../calls/movieCalls";
-
+import Navbar from "../components/Navbar";
 import moment from "moment";
 import {
   Card,
@@ -13,17 +13,23 @@ import {
   Tag,
   Button,
   Input,
-  Divider
+  Divider,
+  Space,
+  Empty,
+  Spin
 } from "antd";
+import { CalendarOutlined, ClockCircleOutlined, GlobalOutlined, StarFilled } from "@ant-design/icons";
 import { getAllTheatresAndShows } from "../calls/showCalls";
+import "./SingleMovie.css";
 
-const { Title } = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 export default function SingleMovie() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [date, setDate] = useState(moment().format("YYYY-MM-DD"));
   const [theatres, setTheatres] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const handleDate = (e) => {
@@ -34,10 +40,13 @@ export default function SingleMovie() {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
+        setLoading(true);
         const res = await getSingleMovie(id);
         setMovie(res.data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -55,108 +64,133 @@ export default function SingleMovie() {
 
   useEffect(() => {
     getAllShowsWithTheatres();
-  }, [date]);
+  }, [date, id]);
+
+  if (loading) {
+    return (
+      <div className="single-movie-page">
+        <Navbar />
+        <div className="loading-container">
+          <Spin size="large" />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: 16 }}>
-      {movie && (
-        <Card>
-          <Row gutter={16}>
-            <Col xs={24} sm={8}>
-              <Image
-                src={movie.posterPath}
-                alt={movie.title}
-                style={{ width: "100%", borderRadius: 6 }}
-                fallback="/placeholder-poster.png"
-              />
-            </Col>
-
-            <Col xs={24} sm={16}>
-              <Title level={4} style={{ marginBottom: 8 }}>
-                {movie.title}
-              </Title>
-
-              {/* Genre (only if present) */}
-              {movie.genre && (
-                <div style={{ marginBottom: 8 }}>
-                  {(Array.isArray(movie.genre)
-                    ? movie.genre
-                    : movie.genre.toString().split(",")
-                  ).map((g) => (
-                    <Tag key={g} style={{ marginBottom: 4 }}>
-                      {g.toString().trim()}
-                    </Tag>
-                  ))}
+    <div className="single-movie-page">
+      <Navbar />
+      <div className="single-movie-container">
+        {movie && (
+          <Card className="movie-detail-card">
+            <Row gutter={[32, 32]}>
+              <Col xs={24} sm={8} md={6}>
+                <div className="poster-wrapper">
+                  <Image
+                    src={movie.posterPath}
+                    alt={movie.title}
+                    className="movie-poster-large"
+                    fallback="https://via.placeholder.com/300x450?text=No+Image"
+                  />
                 </div>
-              )}
+              </Col>
 
-              {/* Rating (only if present) */}
-              {movie.ratings !== undefined && (
-                <div style={{ marginBottom: 12 }}>
-                  <Rate disabled value={Number(movie.ratings) || 0} />
-                  <span style={{ marginLeft: 8 }}>{movie.ratings}</span>
-                </div>
-              )}
+              <Col xs={24} sm={16} md={18}>
+                <div className="movie-info">
+                  <Title level={1} className="movie-title-large">
+                    {movie.title}
+                  </Title>
 
-              {/* Description */}
-              {movie.description && (
-                <p style={{ whiteSpace: "pre-line", marginBottom: 12 }}>
-                  {movie.description}
-                </p>
-              )}
+                  <Space size="middle" wrap className="movie-meta">
+                    {movie.ratings !== undefined && (
+                      <div className="rating-badge">
+                        <StarFilled className="star-icon" />
+                        <Text strong>{movie.ratings}/10</Text>
+                      </div>
+                    )}
+                    {movie.language && (
+                      <Tag icon={<GlobalOutlined />} className="meta-tag">
+                        {movie.language}
+                      </Tag>
+                    )}
+                    {movie.releaseDate && (
+                      <Tag icon={<CalendarOutlined />} className="meta-tag">
+                        {moment(movie.releaseDate).format("MMM DD, YYYY")}
+                      </Tag>
+                    )}
+                  </Space>
 
-              {/* Release date and language (only the fields you have) */}
-              <div>
-                {movie.releaseDate && (
-                  <div>
-                    <strong>Release Date: </strong>
-                    {moment(movie.releaseDate).format("DD-MM-YYYY")}
+                  {movie.genre && (
+                    <div className="genre-section">
+                      {(Array.isArray(movie.genre)
+                        ? movie.genre
+                        : movie.genre.toString().split(",")
+                      ).map((g) => (
+                        <Tag key={g} color="blue" className="genre-tag">
+                          {g.toString().trim()}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
+
+                  {movie.description && (
+                    <Paragraph className="movie-description">
+                      {movie.description}
+                    </Paragraph>
+                  )}
+
+                  <Divider />
+
+                  <div className="date-selector-section">
+                    <Text strong className="date-label">
+                      <CalendarOutlined /> Select Date
+                    </Text>
+                    <Input
+                      type="date"
+                      value={date}
+                      onChange={handleDate}
+                      className="date-input"
+                      min={moment().format("YYYY-MM-DD")}
+                    />
                   </div>
-                )}
-                {movie.language && (
-                  <div>
-                    <strong>Language: </strong>
-                    {movie.language}
-                  </div>
-                )}
-
-                {/* Book Tickets Button */}
-                <div style={{ marginTop: 16 }}>
-                  <Button type="primary">Book Tickets</Button>
                 </div>
-                {/* Date Picker */}
-                <div className="d-flex">
-                  <label>Choose Date</label>
-                  <Input onChange={handleDate} type="date" value={date} />
-                </div>
-              </div>
-            </Col>
-          </Row>
-        </Card>
-      )}
+              </Col>
+            </Row>
+          </Card>
+        )}
 
-      {theatres.length > 0 && (
-        <div className="theatre-wrapper mt-3 pt-3">
-          <h2>Theatres</h2>
-          {theatres.map((theatre) => {
-            return (
-              <div key={theatre._id}>
-                <Row gutter={24} key={theatre._id}>
-                  <Col xs={{ span: 24 }} lg={{ span: 8 }}>
-                    <h3>{theatre.name}</h3>
-                    <p>{theatre.address}</p>
+        {theatres.length > 0 ? (
+          <div className="theatres-section">
+            <Title level={2} className="section-title">
+              Available Theatres & Shows
+            </Title>
+            {theatres.map((theatre) => (
+              <Card key={theatre._id} className="theatre-card" hoverable>
+                <Row gutter={[24, 16]}>
+                  <Col xs={24} lg={8}>
+                    <div className="theatre-info">
+                      <Title level={4} className="theatre-name">
+                        {theatre.name}
+                      </Title>
+                      <Text type="secondary" className="theatre-address">
+                        {theatre.address}
+                      </Text>
+                    </div>
                   </Col>
-                  <Col xs={{ span: 24 }} lg={{ span: 16 }}>
-                    <ul className="show-ul">
-                      {theatre.shows
-                        .sort(
-                          (a, b) =>
-                            moment(a.time, "HH:mm") - moment(b.time, "HH:mm")
-                        )
-                        .map((singleShow) => {
-                          return (
+                  <Col xs={24} lg={16}>
+                    <div className="shows-container">
+                      <Text strong className="shows-label">
+                        <ClockCircleOutlined /> Show Times
+                      </Text>
+                      <ul className="show-ul">
+                        {theatre.shows
+                          .sort(
+                            (a, b) =>
+                              moment(a.time, "HH:mm") - moment(b.time, "HH:mm")
+                          )
+                          .map((singleShow) => (
                             <li
-                              // key={singleShow._id}
+                              key={singleShow._id}
                               onClick={() =>
                                 navigate(`/bookshow/${singleShow._id}`)
                               }
@@ -165,17 +199,26 @@ export default function SingleMovie() {
                                 "hh:mm A"
                               )}
                             </li>
-                          );
-                        })}
-                    </ul>
+                          ))}
+                      </ul>
+                    </div>
                   </Col>
                 </Row>
-                <Divider />
-              </div>
-            );
-          })}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="no-shows-card">
+            <Empty
+              description={
+                <Text type="secondary">
+                  No shows available for the selected date
+                </Text>
+              }
+            />
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
