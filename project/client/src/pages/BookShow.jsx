@@ -17,10 +17,13 @@ function BookShow() {
   const [loading, setLoading] = useState(false);
   const columns = 10;
 
+  console.log(selectedSeats)
+
   const getData = async () => {
     try {
       const res = await getTheShow({ showId: params.id });
       if (res && res.success && res.data) {
+        console.log(res.data)
       setShow(res.data);
       } else if (typeof res === 'string') {
         message.error(res);
@@ -80,7 +83,7 @@ function BookShow() {
     };
   };
 
-  const totalPrice = selectedSeats.length * (show?.ticketPrice || 0);
+  const totalPrice = selectedSeats.length * (show?.ticketPrice || 0); 
 
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
@@ -125,7 +128,7 @@ function BookShow() {
     return <div style={{ padding: 20 }}>Loading...</div>;
   }
 
-  const totalSeats = show.totalSeats || 0;
+  const totalSeats = show.totalSeats || 0; // 200
 
 
   return (
@@ -181,12 +184,12 @@ function BookShow() {
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${columns}, 1fr)`,
-              gap: 8,
+              gap: 20,
               marginBottom: 20,
             }}
           >
             {Array.from({ length: totalSeats }, (_, index) => {
-              const seatNumber = index + 1;
+              const seatNumber = index + 1; // 200
               return (
                 <Button
                   key={seatNumber}

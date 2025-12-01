@@ -3,12 +3,12 @@ const Booking = require("../models/booking.model.js");
 const Show = require("../models/show.model.js");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const isAuth = require('../middlewares/authMiddleware.js');
-const { requireUser } = require('../middlewares/roleMiddleware.js');
+// const { requireUser } = require('../middlewares/roleMiddleware.js');
 
 const bookingRouter = express.Router();
 
 // Create Stripe checkout session (User only)
-bookingRouter.post("/create-checkout-session", isAuth, requireUser, async (req, res) => {
+bookingRouter.post("/create-checkout-session", isAuth,  async (req, res) => {
   try {
     const { amount, userId, showId, seats, showName, customerName, customerEmail, customerAddress } = req.body;
 
@@ -76,9 +76,13 @@ bookingRouter.post("/create-checkout-session", isAuth, requireUser, async (req, 
       },
     });
 
+   
+    console.log(session.url)
     // Update booking with session ID
     booking.stripeSessionId = session.id;
     await booking.save();
+
+ 
 
     res.send({
       success: true,
@@ -98,7 +102,7 @@ bookingRouter.post("/create-checkout-session", isAuth, requireUser, async (req, 
 });
 
 // Verify payment and confirm booking (User only)
-bookingRouter.post("/verify-payment", isAuth, requireUser, async (req, res) => {
+bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
   try {
     const { sessionId } = req.body;
 
