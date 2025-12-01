@@ -3,6 +3,7 @@ const Booking = require("../models/booking.model.js");
 const Show = require("../models/show.model.js");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const isAuth = require('../middlewares/authMiddleware.js');
+const { sendBookingConfirmationEmail } = require('../services/emailService.js');
 // const { requireUser } = require('../middlewares/roleMiddleware.js');
 
 const bookingRouter = express.Router();
@@ -169,10 +170,24 @@ bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
 
     // Populate booking data before sending response
     const populatedBooking = await Booking.findById(booking._id)
+      .populate("user")
       .populate("show")
       .populate({
         path: "show",
         populate: [{ path: "movie" }, { path: "theatre" }],
+      });
+
+    // Send booking confirmation email (non-blocking)
+    sendBookingConfirmationEmail(populatedBooking)
+      .then(result => {
+        if (result.success) {
+          console.log('Booking confirmation email sent successfully');
+        } else {
+          console.error('Failed to send booking confirmation email:', result.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error sending booking confirmation email:', error);
       });
 
     res.send({

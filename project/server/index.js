@@ -6,7 +6,7 @@ const rateLimit = require('express-rate-limit')
 
 // Import the database configuration file that contains connection logic for the database
 const dbConfig = require('./dbConfig.js')
-
+const mongoSanitize = require('express-mongo-sanitize')
 // Import the dotenv package to load environment variables from a .env file
 const dotEnv = require('dotenv')
 
