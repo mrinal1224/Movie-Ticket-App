@@ -46,6 +46,7 @@ app.use(cors({
 app.use(cookieParser())
 
 app.use(limiter)
+app.use(mongoSanitize());
 
 // Mount all routes defined in userRoutes under the '/api/auth' path
 // Example: a route defined as '/login' in user.route.js will become '/api/auth/login'
