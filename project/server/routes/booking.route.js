@@ -8,6 +8,83 @@ const { sendBookingConfirmationEmail } = require('../services/emailService.js');
 
 const bookingRouter = express.Router();
 
+// Helper function to confirm booking (used by both webhook and verify-payment)
+const confirmBooking = async (session) => {
+  try {
+    // Find the booking
+    const booking = await Booking.findById(session.metadata.bookingId);
+
+    if (!booking) {
+      console.error("Booking not found for session:", session.id);
+      return { success: false, message: "Booking not found" };
+    }
+
+    // Check if already completed
+    if (booking.status === "completed") {
+      console.log("Booking already confirmed:", booking._id);
+      return { success: true, message: "Booking already confirmed", booking };
+    }
+
+    // Check if seats are still available
+    const show = await Show.findById(booking.show);
+    if (!show) {
+      booking.status = "failed";
+      await booking.save();
+      return { success: false, message: "Show not found" };
+    }
+
+    // Check if any of the selected seats are already booked
+    const conflictingSeats = booking.seats.filter((seat) =>
+      show.bookedSeats.includes(seat)
+    );
+
+    if (conflictingSeats.length > 0) {
+      booking.status = "failed";
+      await booking.save();
+      return { 
+        success: false, 
+        message: `Seats ${conflictingSeats.join(", ")} are already booked` 
+      };
+    }
+
+    // Update booking
+    booking.stripePaymentIntentId = session.payment_intent;
+    booking.status = "completed";
+    await booking.save();
+
+    // Update show's bookedSeats array
+    show.bookedSeats = [...show.bookedSeats, ...booking.seats];
+    await show.save();
+
+    // Populate booking data
+    const populatedBooking = await Booking.findById(booking._id)
+      .populate("user")
+      .populate("show")
+      .populate({
+        path: "show",
+        populate: [{ path: "movie" }, { path: "theatre" }],
+      });
+
+    // Send booking confirmation email (non-blocking)
+    sendBookingConfirmationEmail(populatedBooking)
+      .then(result => {
+        if (result.success) {
+          console.log('Booking confirmation email sent successfully');
+        } else {
+          console.error('Failed to send booking confirmation email:', result.message);
+        }
+      })
+      .catch(error => {
+        console.error('Error sending booking confirmation email:', error);
+      });
+
+    return { success: true, booking: populatedBooking };
+  } catch (error) {
+    console.error("Error confirming booking:", error);
+    return { success: false, message: error.message || "Failed to confirm booking" };
+  }
+};
+
 // Create Stripe checkout session (User only)
 bookingRouter.post("/create-checkout-session", isAuth,  async (req, res) => {
   try {
@@ -117,83 +194,20 @@ bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
       });
     }
 
-    // Find the booking
-    const booking = await Booking.findById(session.metadata.bookingId);
+    // Use the helper function to confirm booking
+    const result = await confirmBooking(session);
 
-    if (!booking) {
+    if (!result.success) {
       return res.send({
         success: false,
-        message: "Booking not found",
+        message: result.message,
       });
     }
-
-    // Check if already completed
-    if (booking.status === "completed") {
-      return res.send({
-        success: true,
-        message: "Booking already confirmed",
-        data: booking,
-      });
-    }
-
-    // Check if seats are still available
-    const show = await Show.findById(booking.show);
-    if (!show) {
-      return res.send({
-        success: false,
-        message: "Show not found",
-      });
-    }
-
-    // Check if any of the selected seats are already booked
-    const conflictingSeats = booking.seats.filter((seat) =>
-      show.bookedSeats.includes(seat)
-    );
-
-    if (conflictingSeats.length > 0) {
-      booking.status = "failed";
-      await booking.save();
-      return res.send({
-        success: false,
-        message: `Seats ${conflictingSeats.join(", ")} are already booked`,
-      });
-    }
-
-    // Update booking
-    booking.stripePaymentIntentId = session.payment_intent;
-    booking.status = "completed";
-    await booking.save();
-
-    // Update show's bookedSeats array
-    show.bookedSeats = [...show.bookedSeats, ...booking.seats];
-    await show.save();
-
-    // Populate booking data before sending response
-    const populatedBooking = await Booking.findById(booking._id)
-      .populate("user")
-      .populate("show")
-      .populate({
-        path: "show",
-        populate: [{ path: "movie" }, { path: "theatre" }],
-      });
-
-    // Send booking confirmation email (non-blocking)
-    sendBookingConfirmationEmail(populatedBooking)
-      .then(result => {
-        if (result.success) {
-          console.log('Booking confirmation email sent successfully');
-        } else {
-          console.error('Failed to send booking confirmation email:', result.message);
-        }
-      })
-      .catch(error => {
-        console.error('Error sending booking confirmation email:', error);
-      });
 
     res.send({
       success: true,
       message: "Payment verified and booking confirmed!",
-      data: populatedBooking,
+      data: result.booking,
     });
   } catch (error) {
     console.error("Error verifying payment:", error);
