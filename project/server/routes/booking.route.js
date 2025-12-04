@@ -8,7 +8,7 @@ const { sendBookingConfirmationEmail } = require('../services/emailService.js');
 
 const bookingRouter = express.Router();
 
-// Helper function to confirm booking (used by both webhook and verify-payment)
+// Helper function to confirm booking (used by verify-payment)
 const confirmBooking = async (session) => {
   try {
     // Find the booking
@@ -22,7 +22,15 @@ const confirmBooking = async (session) => {
     // Check if already completed
     if (booking.status === "completed") {
       console.log("Booking already confirmed:", booking._id);
-      return { success: true, message: "Booking already confirmed", booking };
+      // Still populate and return the booking to ensure we return complete data
+      const populatedBooking = await Booking.findById(booking._id)
+        .populate("user")
+        .populate("show")
+        .populate({
+          path: "show",
+          populate: [{ path: "movie" }, { path: "theatre" }],
+        });
+      return { success: true, message: "Booking already confirmed", booking: populatedBooking };
     }
 
     // Check if seats are still available
@@ -184,6 +192,13 @@ bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
   try {
     const { sessionId } = req.body;
 
+    if (!sessionId) {
+      return res.send({
+        success: false,
+        message: "Session ID is required",
+      });
+    }
+
     // Retrieve the session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
@@ -194,7 +209,7 @@ bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
       });
     }
 
-    // Use the helper function to confirm booking
+    // Immediately confirm booking (this sets status to "completed")
     const result = await confirmBooking(session);
 
     if (!result.success) {
@@ -204,10 +219,34 @@ bookingRouter.post("/verify-payment", isAuth, async (req, res) => {
       });
     }
 
+    // Ensure the booking status is "completed" before returning
+    const confirmedBooking = result.booking;
+    if (confirmedBooking.status !== "completed") {
+      // Double-check and update if needed
+      const booking = await Booking.findById(confirmedBooking._id);
+      if (booking && booking.status !== "completed") {
+        booking.status = "completed";
+        await booking.save();
+        // Re-populate
+        const updatedBooking = await Booking.findById(booking._id)
+          .populate("user")
+          .populate("show")
+          .populate({
+            path: "show",
+            populate: [{ path: "movie" }, { path: "theatre" }],
+          });
+        return res.send({
+          success: true,
+          message: "Payment verified and booking confirmed!",
+          data: updatedBooking,
+        });
+      }
+    }
+
     res.send({
       success: true,
       message: "Payment verified and booking confirmed!",
-      data: result.booking,
+      data: confirmedBooking,
     });
   } catch (error) {
     console.error("Error verifying payment:", error);

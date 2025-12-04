@@ -11,7 +11,11 @@ export const register = async(values)=>{
        const response = await api.post('/api/auth/register' , values)
        return response.data
     } catch (error) {
-        console.log(error)
+        console.error('Registration error:', error)
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || 'Registration failed'
+        }
     }
 }
 
@@ -20,7 +24,11 @@ export const login = async(values)=>{
        const response = await api.post('/api/auth/login' , values)
        return response.data
     } catch (error) {
-        console.log(error)
+        console.error('Login error:', error)
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || 'Login failed'
+        }
     }
 }
 

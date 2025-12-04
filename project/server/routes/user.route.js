@@ -9,6 +9,10 @@ const userRouter = express.Router(); // Route
 // Sign up Route
 
 userRouter.post("/register", async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
   try {
     // Prevent admin registration through API
     if (req.body.role === "admin") {
@@ -57,6 +61,10 @@ userRouter.post("/register", async (req, res) => {
 // Login Api
 
 userRouter.post("/login", async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
   try {
     const user = await User.findOne({ email: req.body.email });
 

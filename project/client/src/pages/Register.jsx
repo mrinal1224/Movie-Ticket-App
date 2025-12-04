@@ -13,7 +13,7 @@ function Register() {
   const onSubmit = async (values) => {
     try {
       const userData = await register(values)
-      if (userData.success) {
+      if (userData && userData.success) {
         message.success(userData.message)
         // Navigate based on role
         if (values.role === 'partner') {
@@ -22,11 +22,11 @@ function Register() {
           navigate('/home')
         }
       } else {
-        message.error(userData.message)
+        message.error(userData?.message || "Registration failed")
       }
     } catch (error) {
-      console.log(error.message)
-      message.error("Registration failed")
+      console.error("Registration error:", error)
+      message.error(error?.message || "Registration failed")
     }
   }
 

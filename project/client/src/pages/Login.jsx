@@ -16,7 +16,7 @@ function Login() {
   const onSubmit = async (values) => {
     try {
       const userData = await login(values)
-      if (userData.success) {
+      if (userData && userData.success) {
         message.success(userData.message)
         dispatch(setUserData(userData.user))
         // Navigate based on role
@@ -28,11 +28,12 @@ function Login() {
           navigate('/home')
         }
       } else {
-        message.error(userData.message)
+        console.log(userData)
+        message.error(userData?.message || "Login failed")
       }
     } catch (error) {
-      console.log(error.message)
-      message.error("Login failed")
+      console.error("Login error:", error)
+      message.error(error?.message || "Login failed")
     }
   }
 

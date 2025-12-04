@@ -73,11 +73,22 @@ function PaymentSuccess() {
             </Text>
             {booking && (
               <div style={{ textAlign: "left", marginBottom: 20, padding: 20, backgroundColor: "#f5f5f5", borderRadius: 8 }}>
+                <Text strong>Booking Status: </Text>
+                <Text style={{ color: "#52c41a", fontWeight: "bold" }}>COMPLETED</Text>
+                <br />
+                <br />
                 <Text strong>Seats: </Text>
                 <Text>{booking.seats.sort((a, b) => a - b).join(", ")}</Text>
                 <br />
                 <Text strong>Total Amount: </Text>
                 <Text>₹{booking.totalAmount}</Text>
+                {booking.show && booking.show.movie && (
+                  <>
+                    <br />
+                    <Text strong>Movie: </Text>
+                    <Text>{booking.show.movie.title}</Text>
+                  </>
+                )}
               </div>
             )}
             <Space>
